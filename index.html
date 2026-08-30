@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جدول توزيع الإذاعة المدرسية</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        /* الألوان المتغيرة للوضع الفاتح والداكن */
+        :root {
+            --bg-color: #f4f7f6;
+            --container-bg: #ffffff;
+            --text-color: #333333;
+            --card-bg: #ffffff;
+            --header-bg: #34495e;
+            --header-text: #ffffff;
+            --row-even: #fafbfc;
+            --border-color: #e2e8f0;
+            --filter-bg: #f8f9fa;
+            --input-bg: #ffffff;
+            --input-text: #333333;
+            --input-border: #ced4da;
+        }
+
+        body.dark-mode {
+            --bg-color: #121212;
+            --container-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --card-bg: #2a2a2a;
+            --header-bg: #2c3e50;
+            --header-text: #e0e0e0;
+            --row-even: #252525;
+            --border-color: #333333;
+            --filter-bg: #242424;
+            --input-bg: #2a2a2a;
+            --input-text: #e0e0e0;
+            --input-border: #444444;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            direction: rtl;
+            text-align: right;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            background: var(--container-bg);
+            padding: 20px 25px;
+            border-radius: 14px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        /* ترويسة الثلاثة شعارات الرسمية */
+        .official-header {
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 12px;
+            margin-bottom: 15px;
+            transition: border-color 0.3s ease;
+        }
+        .logos-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: -12px;
+            margin-bottom: 0px;
+            padding: 0 5px;
+        }
+        .logo-right {
+            height: 120px;
+            width: auto;
+            max-width: 260px;
+            object-fit: contain;
+        }
+        .logo-left {
+            height: 88px;
+            width: auto;
+            max-width: 200px;
+            object-fit: contain;
+        }
+        .logo-center {
+            height: 64px;
+            width: auto;
+            max-width: 140px;
+            object-fit: contain;
+        }
+
+        @media (max-width: 768px) {
+            .logo-right { height: 70px; max-width: 150px; }
+            .logo-left { height: 52px; max-width: 115px; }
+            .logo-center { height: 40px; max-width: 85px; }
+            body { padding: 8px; }
+            .container { padding: 12px; }
+        }
+
+        .header-title-center {
+            text-align: center;
+            margin-top: 5px;
+            margin-bottom: 12px;
+        }
+        .header-title-center h2 {
+            margin: 0;
+            color: var(--text-color);
+            font-size: 21px;
+            font-weight: 700;
+        }
+        
+        /* تذييل التوقيع أو الاعتماد */
+        .official-footer {
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px dashed var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 15px;
+            font-weight: 600;
+        }
+        .manager-signature {
+            text-align: left;
+            line-height: 1.6;
+        }
+        .manager-signature span {
+            display: block;
+            font-weight: normal;
+            font-size: 14px;
+            color: #666;
+        }
+        body.dark-mode .manager-signature span {
+            color: #aaa;
+        }
+
+        .filter-section { display: flex; gap: 15px; margin: 15px 0; flex-wrap: wrap; background: var(--filter-bg); padding: 15px; border-radius: 10px; border: 1px solid var(--border-color); transition: background-color 0.3s ease, border-color 0.3s ease; }
+        .filter-group { flex: 1; min-width: 220px; }
+        .filter-group label { display: block; margin-bottom: 5px; font-weight: bold; color: var(--text-color); font-size: 14px; }
+        .filter-group select { width: 100%; padding: 9px; border: 1px solid var(--input-border); border-radius: 8px; background: var(--input-bg); color: var(--input-text); box-sizing: border-box; }
+
+        .admin-section .form-group select {
+            width: 100% !important;
+            padding: 10px;
+            border: 1px solid var(--input-border);
+            border-radius: 8px;
+            background: var(--input-bg);
+            color: var(--input-text);
+            box-sizing: border-box;
+            font-size: 15px;
+        }
+
+        .table-responsive { width: 100%; overflow-x: auto; margin-top: 15px; }
+        table { width: 100%; border-collapse: collapse; min-width: 600px; }
+        th, td { border: 1px solid var(--border-color); padding: 12px; text-align: center; transition: border-color 0.3s ease; }
+        th { background-color: var(--header-bg); color: var(--header-text); font-weight: 600; }
+        tr:nth-child(even) { background-color: var(--row-even); }
+        
+        table input, table select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid var(--input-border);
+            border-radius: 6px;
+            box-sizing: border-box;
+            background: var(--input-bg);
+            color: var(--input-text);
+            text-align: center;
+        }
+
+        .hijri-select-group {
+            display: flex;
+            gap: 8px;
+            min-width: 240px;
+        }
+        .hijri-select-group select {
+            flex: 1;
+            padding: 10px 5px;
+            font-size: 14px;
+            background: var(--input-bg);
+            color: var(--input-text);
+        }
+        #adminTable select, #adminTable input {
+            min-width: 110px;
+        }
+
+        .admin-section { margin-top: 25px; padding: 20px; background: var(--filter-bg); border-radius: 10px; border: 1px solid var(--border-color); display: none; transition: background-color 0.3s ease, border-color 0.3s ease; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: var(--text-color); }
+        
+        button { background-color: #2b8a3e; color: white; padding: 10px 15px; border: none; border-radius: 8px; cursor: pointer; width: 100%; font-size: 16px; }
+        button:hover { background-color: #236c31; }
+        
+        .login-btn-container { text-align: left; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .buttons-group { display: flex; gap: 8px; align-items: center; }
+        .login-toggle { background: #495057; padding: 6px 14px; font-size: 14px; width: auto; border-radius: 8px; }
+        .theme-toggle { background: #6c757d; padding: 6px 14px; font-size: 14px; width: auto; border-radius: 8px; }
+        
+        .pdf-btn { background-color: #0b7285; padding: 6px 14px; font-size: 14px; width: auto; border-radius: 8px; }
+
+        .back-btn { background-color: #c92a2a; margin-top: 10px; border-radius: 8px; }
+        #message { text-align: center; margin-top: 10px; font-weight: bold; }
+
+        #loadingSpinner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.3s ease;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #0b7285;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        .spinner-text {
+            color: #ffffff;
+            margin-top: 12px;
+            font-weight: 600;
+            font-size: 16px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAghR_dUF9S4uIYXvBwSCPF9hyYR9tjHmk",
+            authDomain: "radio-31e1f.firebaseapp.com",
+            databaseURL: "https://radio-31e1f-default-rtdb.firebaseio.com",
+            projectId: "radio-31e1f",
+            storageBucket: "radio-31e1f.firebasestorage.app",
+            messagingSenderId: "562818767550",
+            appId: "1:562818767550:web:184efe5c8b0b80b6a85cef",
+            measurementId: "G-0EQPK38KJL"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        let allData = [];
+
+        const daysOfWeek = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس"];
+        const gradesList = ["أول ثانوي", "ثاني ثانوي", "ثالث ثانوي"];
+        const classesList = ["1", "2", "3", "4", "5", "6", "7", "8"];
+
+        const hijriDays = Array.from({length: 30}, (_, i) => String(i + 1));
+        const hijriMonths = [
+            "محرم", "صفر", "ربيع الأول", "ربيع الآخر",
+            "جمادى الأولى", "جمادى الآخرة", "رجب", "شعبان",
+            "رمضان", "شوال", "ذو القعدة", "ذو الحجة"
+        ];
+        const hijriYears = ["1448", "1449", "1450", "1451"];
+
+        const termsData = {
+            "الفصل الأول": [
+                "الأسبوع الأول", "الأسبوع الثاني", "الأسبوع الثالث", "الأسبوع الرابع",
+                "الأسبوع الخامس", "الأسبوع السادس", "الأسبوع السابع", "الأسبوع الثامن",
+                "الأسبوع التاسع", "الأسبوع العاشر", "الأسبوع الحادي عشر", "الأسبوع الثاني عشر",
+                "الأسبوع الثالث عشر", "الأسبوع الرابع عشر", "الأسبوع الخامس عشر", "الأسبوع السادس عشر",
+                "الأسبوع السابع عشر", "الأسبوع الثامن عشر"
+            ],
+            "الفصل الثاني": [
+                "الأسبوع الأول", "الأسبوع الثاني", "الأسبوع الثالث", "الأسبوع الرابع",
+                "الأسبوع الخامس", "الأسبوع السادس", "الأسبوع السابع", "الأسبوع الثامن",
+                "الأسبوع التاسع", "الأسبوع العاشر", "الأسبوع الحادي عشر", "الأسبوع الثاني عشر",
+                "الأسبوع الثالث عشر", "الأسبوع الرابع عشر", "الأسبوع الخامس عشر", "الأسبوع السادس عشر",
+                "الأسبوع السابع عشر", "الأسبوع الثامن عشر", "الأسبوع التاسع عشر"
+            ]
+        };
+
+        const firstTermSundayDates = [
+            { week: "الأسبوع الأول", day: 17, month: "ربيع الأول" },
+            { week: "الأسبوع الثاني", day: 24, month: "ربيع الأول" },
+            { week: "الأسبوع الثالث", day: 2, month: "ربيع الآخر" },
+            { week: "الأسبوع الرابع", day: 9, month: "ربيع الآخر" },
+            { week: "الأسبوع الخامس", day: 16, month: "ربيع الآخر" },
+            { week: "الأسبوع السادس", day: 23, month: "ربيع الآخر" },
+            { week: "الأسبوع السابع", day: 30, month: "ربيع الآخر" },
+            { week: "الأسبوع الثامن", day: 7, month: "جماد أول" },
+            { week: "الأسبوع التاسع", day: 14, month: "جماد أول" },
+            { week: "الأسبوع العاشر", day: 21, month: "جماد أول" },
+            { week: "الأسبوع الحادي عشر", day: 28, month: "جماد أول" },
+            { week: "الأسبوع الثاني عشر", day: 5, month: "جماد ثاني" },
+            { week: "الأسبوع الثالث عشر", day: 19, month: "جماد ثاني" },
+            { week: "الأسبوع الرابع عشر", day: 26, month: "جماد ثاني" },
+            { week: "الأسبوع الخامس عشر", day: 4, month: "رجب" },
+            { week: "الأسبوع السادس عشر", day: 11, month: "رجب" },
+            { week: "الأسبوع السابع عشر", day: 18, month: "رجب" },
+            { week: "الأسبوع الثامن عشر", day: 25, month: "رجب" }
+        ];
+
+        function getMonthNumber(monthName) {
+            const map = {
+                "محرم": 1, "صفر": 2, "ربيع الأول": 3, "ربيع الآخر": 4,
+                "جمادى الأولى": 5, "جماد أول": 5, "جمادى الآخرة": 6, "جماد ثاني": 6,
+                "رجب": 7, "شعبان": 8, "رمضان": 9, "شوال": 10, "ذو القعدة": 11, "ذو الحجة": 12
+            };
+            return map[monthName] || 0;
+        }
+
+        window.autoSelectCurrentWeek = function() {
+            const termSelect = document.getElementById('selectTerm');
+            const weekSelect = document.getElementById('selectWeek');
+            if (!termSelect || !weekSelect) return;
+
+            termSelect.value = "الفصل الأول";
+            window.updateWeeksFilter();
+
+            const today = new Date();
+            try {
+                let formatter = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura', { day: 'numeric', month: 'long' });
+                let parts = formatter.formatToParts(today);
+                let currentDay = parseInt(parts.find(p => p.type === 'day')?.value || '1');
+                let currentMonthStr = parts.find(p => p.type === 'month')?.value || '';
+
+                let matchedWeek = firstTermSundayDates[0].week;
+                let currentTotalDays = currentDay + (getMonthNumber(currentMonthStr) * 30);
+
+                firstTermSundayDates.forEach(item => {
+                    let itemTotalDays = item.day + (getMonthNumber(item.month) * 30);
+                    let diff = currentTotalDays - itemTotalDays;
+                    if (diff >= 0 && diff < 7) {
+                        matchedWeek = item.week;
+                    }
+                });
+
+                weekSelect.value = matchedWeek;
+            } catch (e) {
+                weekSelect.value = "الأسبوع الأول";
+            }
+
+            window.filterTable();
+        };
+
+        window.updateWeeksFilter = function() {
+            const term = document.getElementById('selectTerm').value;
+            const weekSelect = document.getElementById('selectWeek');
+            weekSelect.innerHTML = '';
+
+            if(termsData[term]) {
+                termsData[term].forEach(week => {
+                    let opt = document.createElement('option');
+                    opt.value = week;
+                    opt.textContent = week;
+                    weekSelect.appendChild(opt);
+                });
+            }
+            window.filterTable();
+        };
+
+        window.updateAdminWeeks = function() {
+            const term = document.getElementById('adminTerm').value;
+            const weekSelect = document.getElementById('adminWeek');
+            weekSelect.innerHTML = '';
+
+            if(termsData[term]) {
+                termsData[term].forEach(week => {
+                    let opt = document.createElement('option');
+                    opt.value = week;
+                    opt.textContent = week;
+                    weekSelect.appendChild(opt);
+                });
+            }
+            window.renderAdminTableStructure();
+        };
+
+        window.renderAdminTableStructure = function() {
+            const tbody = document.getElementById('adminTableBody');
+            tbody.innerHTML = '';
+
+            daysOfWeek.forEach((day, index) => {
+                let gradeOptions = `<option value="">اختر الصف</option>` + gradesList.map(g => `<option value="${g}">${g}</option>`).join('');
+                let classOptions = `<option value="">اختر الفصل</option>` + classesList.map(c => `<option value="${c}">${c}</option>`).join('');
+
+                let dayOpts = `<option value="">اليوم</option>` + hijriDays.map(d => `<option value="${d}">${d}</option>`).join('');
+                let monthOpts = `<option value="">الشهر</option>` + hijriMonths.map(m => `<option value="${m}">${m}</option>`).join('');
+                let yearOpts = `<option value="">السنة</option>` + hijriYears.map(y => `<option value="${y}">${y}</option>`).join('');
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${day}</strong></td>
+                        <td>
+                            <div class="hijri-select-group">
+                                <select id="d_${index}_day">${dayOpts}</select>
+                                <select id="d_${index}_month">${monthOpts}</select>
+                                <select id="d_${index}_year">${yearOpts}</select>
+                            </div>
+                        </td>
+                        <td><select id="d_${index}_grade">${gradeOptions}</select></td>
+                        <td><select id="d_${index}_class">${classOptions}</select></td>
+                        <td><input type="text" id="d_${index}_topic" placeholder="موضوع الإذاعة..."></td>
+                    </tr>
+                `;
+            });
+            window.fillAdminTableData();
+        };
+
+        window.fillAdminTableData = function() {
+            const term = document.getElementById('adminTerm').value;
+            const week = document.getElementById('adminWeek').value;
+            const targetKey = `${term} / ${week}`.trim();
+
+            const weekData = allData.filter(row => row.Week && row.Week.trim() === targetKey);
+
+            daysOfWeek.forEach((day, index) => {
+                const rowData = weekData.find(r => r.Name && r.Name.trim() === day);
+                
+                let daySelect = document.getElementById(`d_${index}_day`);
+                let monthSelect = document.getElementById(`d_${index}_month`);
+                let yearSelect = document.getElementById(`d_${index}_year`);
+
+                if(daySelect) daySelect.value = rowData && rowData.Day ? rowData.Day : '';
+                if(monthSelect) monthSelect.value = rowData && rowData.Month ? rowData.Month : '';
+                if(yearSelect) yearSelect.value = rowData && rowData.Year ? rowData.Year : '';
+
+                let gradeEl = document.getElementById(`d_${index}_grade`);
+                let classEl = document.getElementById(`d_${index}_class`);
+                let topicEl = document.getElementById(`d_${index}_topic`);
+
+                if(gradeEl) gradeEl.value = rowData && rowData.Grade ? rowData.Grade.trim() : '';
+                if(classEl) {
+                    let savedClass = rowData && rowData.Class ? rowData.Class.replace('فصل', '').trim() : '';
+                    classEl.value = savedClass;
+                }
+                if(topicEl) topicEl.value = rowData && rowData.Details ? rowData.Details.trim() : '';
+            });
+        };
+
+        window.filterTable = function() {
+            const term = document.getElementById('selectTerm').value;
+            const week = document.getElementById('selectWeek').value;
+            
+            const targetKey = `${term} / ${week}`.trim();
+            document.getElementById('pageTitle').textContent = `توزيع الإذاعة المدرسية - ${term} (${week})`;
+
+            const tableBody = document.querySelector('#employeeTable tbody');
+            tableBody.innerHTML = '';
+
+            const filteredData = allData.filter(row => row.Week && row.Week.trim() === targetKey);
+
+            if (filteredData.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="5" style="color: #777;">لا توجد بيانات مسجلة لهذه الفترة حتى الآن.</td></tr>`;
+                return;
+            }
+
+            daysOfWeek.forEach(day => {
+                const row = filteredData.find(r => r.Name && r.Name.trim() === day);
+                if (row) {
+                    let displayClass = row.Class ? `فصل ${row.Class.replace('فصل', '').trim()}` : '';
+                    
+                    let dateParts = [];
+                    if (row.Day) dateParts.push(row.Day);
+                    if (row.Month) dateParts.push(row.Month);
+                    if (row.Year) dateParts.push(row.Year);
+                    let fullDateDisplay = dateParts.join(' ');
+
+                    tableBody.innerHTML += `
+                        <tr>
+                            <td><strong>${row.Name || ''}</strong></td>
+                            <td>${fullDateDisplay}</td>
+                            <td>${row.Grade || ''}</td>
+                            <td>${displayClass}</td>
+                            <td>${row.Details || ''}</td>
+                        </tr>
+                    `;
+                }
+            });
+        };
+
+        window.toggleAdmin = function() {
+            let panel = document.getElementById("adminPanel");
+            if (panel.style.display === "block") {
+                panel.style.display = "none";
+            } else {
+                let password = prompt("الرجاء إدخال كلمة السر :");
+                let cleanPass = password ? password.trim().toLowerCase() : "";
+                
+                if (cleanPass === "1234" || cleanPass === "١٢٣٤" || cleanPass === "كلمة_السر_الجديدة") {
+                    panel.style.display = "block";
+                    window.renderAdminTableStructure();
+                } else if (password !== null) {
+                    alert("كلمة السر غير صحيحة!");
+                }
+            }
+        };
+
+        window.toggleDarkMode = function() {
+            const body = document.body;
+            const themeBtn = document.getElementById('themeToggleBtn');
+            body.classList.toggle('dark-mode');
+            
+            if (body.classList.contains('dark-mode')) {
+                localStorage.setItem('theme', 'dark');
+                themeBtn.textContent = ' الوضع الفاتح';
+            } else {
+                localStorage.setItem('theme', 'light');
+                themeBtn.textContent = ' الوضع الداكن';
+            }
+        };
+
+        window.downloadPDF = function() {
+            const element = document.getElementById('pdfContent');
+            const term = document.getElementById('selectTerm').value;
+            const week = document.getElementById('selectWeek').value;
+            
+            const options = {
+                margin:      10,
+                filename:    `جدول_الإذاعة_${term}_${week}.pdf`,
+                image:       { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
+                jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().from(element).set(options).save();
+        };
+
+        function hideSpinner() {
+            const spinner = document.getElementById('loadingSpinner');
+            if (spinner) {
+                spinner.style.opacity = '0';
+                setTimeout(() => spinner.style.display = 'none', 300);
+            }
+        }
+
+        function loadData() {
+            const dbRef = ref(db, 'radioData');
+            onValue(dbRef, (snapshot) => {
+                const data = snapshot.val();
+                allData = data ? Object.values(data) : [];
+                window.updateWeeksFilter();
+                window.autoSelectCurrentWeek();
+                if(document.getElementById("adminPanel").style.display === "block") {
+                    window.fillAdminTableData();
+                }
+                hideSpinner();
+            }, (error) => {
+                console.error('خطأ في جلب البيانات:', error);
+                hideSpinner();
+            });
+        }
+
+        window.saveAdminData = function() {
+            const msgEl = document.getElementById('message');
+            msgEl.style.color = '#0b7285';
+            msgEl.textContent = 'جاري حفظ التعديلات... ⏳';
+
+            const term = document.getElementById('adminTerm').value;
+            const week = document.getElementById('adminWeek').value;
+            const fullWeekPath = `${term} / ${week}`;
+
+            daysOfWeek.forEach((day, index) => {
+                const formData = {
+                    Name: day,
+                    Week: fullWeekPath,
+                    Day: document.getElementById(`d_${index}_day`).value,
+                    Month: document.getElementById(`d_${index}_month`).value,
+                    Year: document.getElementById(`d_${index}_year`).value,
+                    Grade: document.getElementById(`d_${index}_grade`).value,
+                    Class: document.getElementById(`d_${index}_class`).value,
+                    Details: document.getElementById(`d_${index}_topic`).value
+                };
+
+                let uniqueId = `${term}_${week}_${day}`.replace(/\s+/g, '_');
+                set(ref(db, 'radioData/' + uniqueId), formData);
+            });
+
+            setTimeout(() => {
+                msgEl.style.color = 'green';
+                msgEl.textContent = 'تم حفظ البيانات بنجاح! ';
+            }, 500);
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (localStorage.getItem('theme') === 'dark') {
+                document.body.classList.add('dark-mode');
+                const themeBtn = document.getElementById('themeToggleBtn');
+                if(themeBtn) themeBtn.textContent = ' الوضع الفاتح';
+            }
+
+            window.updateAdminWeeks();
+            loadData();
+        });
+    </script>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎙️</text></svg>">
+</head>
+<body>
+
+<div id="loadingSpinner">
+    <div class="spinner"></div>
+    <div class="spinner-text">جاري تحميل جداول الإذاعة...</div>
+</div>
+
+<div class="container">
+    <div class="login-btn-container">
+        <button type="button" class="pdf-btn" onclick="downloadPDF()">💾 </button>
+        <div class="buttons-group">
+            <button type="button" class="theme-toggle" id="themeToggleBtn" onclick="toggleDarkMode()"> الوضع الداكن</button>
+            <button type="button" class="login-toggle" onclick="toggleAdmin()">إدخال البيانات</button>
+        </div>
+    </div>
+
+    <div id="pdfContent" style="direction: rtl; text-align: right; background: var(--container-bg); padding: 10px 15px; transition: background-color 0.3s ease;">
+        
+        <div class="official-header">
+            <div class="logos-row">
+                <img src="Minisrty-of-Education-01-1-1.png" alt="شعار الوزارة" class="logo-right" onerror="this.src='https://i.ibb.co/3sX8S4q/logo.png'; this.onerror=null;">
+                
+                <img src="رؤية.png" alt="شعار المدرسة" class="logo-center" onerror="this.src='https://i.ibb.co/3sX8S4q/logo.png'; this.onerror=null;">
+                
+                <img src="شعار الثانوية الستون مفرغ.png" alt="شعار الرؤية" class="logo-left" onerror="this.src='https://i.ibb.co/3sX8S4q/logo.png'; this.onerror=null;">
+            </div>
+            
+            <div class="header-title-center">
+                <h2 id="pageTitle">توزيع الإذاعة المدرسية</h2>
+            </div>
+        </div>
+        
+        <div class="filter-section">
+            <div class="filter-group">
+                <label for="selectTerm">الفصل الدراسي:</label>
+                <select id="selectTerm" onchange="updateWeeksFilter()">
+                    <option value="الفصل الأول">الفصل الأول</option>
+                    <option value="الفصل الثاني">الفصل الثاني</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="selectWeek">الأسبوع:</label>
+                <select id="selectWeek" onchange="filterTable()">
+                    </select>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table id="employeeTable">
+                <thead>
+                    <tr>
+                        <th>أيام الأسبوع</th>
+                        <th>التاريخ الهجري</th>
+                        <th>الصف</th>
+                        <th>الفصل</th>
+                        <th>موضوع الإذاعة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    </tbody>
+            </table>
+        </div>
+
+        <!-- تذييل القائدة المعتمد -->
+        <div class="manager-signature">
+    <strong dir="rtl" style="unicode-bidi: bidi-override; text-align: right; display: inline-block;">مديرة المدرسة: د - ريم صديق  </strong>
+</div>
+        </div>
+
+    </div>
+
+    <div id="adminPanel" class="admin-section">
+        <h3>لوحة التحكم (تعديل جدول الإذاعة)</h3>
+        <div>
+            <div class="form-group">
+                <label for="adminTerm">الفصل الدراسي:</label>
+                <select id="adminTerm" onchange="updateAdminWeeks()">
+                    <option value="الفصل الأول">الفصل الأول</option>
+                    <option value="الفصل الثاني">الفصل الثاني</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="adminWeek">الأسبوع:</label>
+                <select id="adminWeek" name="Week" onchange="fillAdminTableData()">
+                    </select>
+            </div>
+
+            <div class="table-responsive">
+                <table id="adminTable">
+                    <thead>
+                        <tr>
+                            <th>أيام الأسبوع</th>
+                            <th>التاريخ الهجري (يوم / شهر / سنة)</th>
+                            <th>الصف</th>
+                            <th>الفصل</th>
+                            <th>موضوع الإذاعة</th>
+                        </tr>
+                    </thead>
+                    <tbody id="adminTableBody">
+                        </tbody>
+                </table>
+            </div>
+
+            <button type="button" onclick="saveAdminData()" style="margin-top: 15px;">حفظ التعديلات</button>
+        </div>
+        <button type="button" class="back-btn" onclick="toggleAdmin()">العودة للشاشة الرئيسية </button>
+        <p id="message"></p>
+    </div>
+</div>
+
+</body>
+</html>
