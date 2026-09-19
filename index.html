@@ -238,8 +238,7 @@
             100% { transform: rotate(360deg); }
         }
     </style>
-
-    <script type="module">
+<<script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
         import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
 
@@ -318,26 +317,31 @@
             return map[monthName] || 0;
         }
 
-        // جلب الإعدادات العامة المعتمَدة من قاعدة البيانات للتابعين والتحكم المركزي
+        // جلب الإعدادات العامة المعتمَدة من قاعدة البيانات للطالبات والتحكم المركزي
         function listenToGlobalSettings() {
             const settingsRef = ref(db, 'globalSettings');
             onValue(settingsRef, (snapshot) => {
                 const settings = snapshot.val();
+                const termSelect = document.getElementById('selectTerm');
+                const weekSelect = document.getElementById('selectWeek');
+                
+                if (!termSelect || !weekSelect) return;
+
                 if (settings && settings.currentTerm && settings.currentWeek) {
-                    const termSelect = document.getElementById('selectTerm');
-                    const weekSelect = document.getElementById('selectWeek');
-                    
-                    if (termSelect && weekSelect) {
-                        termSelect.value = settings.currentTerm;
-                        window.updateWeeksFilter(); 
-                        weekSelect.value = settings.currentWeek;
-                        window.filterTable(); 
-                    }
+                    termSelect.value = settings.currentTerm;
+                    window.updateWeeksFilter(); 
+                    weekSelect.value = settings.currentWeek;
+                    window.filterTable(); 
+                } else {
+                    termSelect.value = "الفصل الأول";
+                    window.updateWeeksFilter();
+                    weekSelect.value = "الأسبوع الأول";
+                    window.filterTable();
                 }
             });
         }
 
-        // دالة حفظ ونشر الأسبوع الحالي للجميع (أصبحت دالة مستقلة وصحيحة 100%)
+        // دالة حفظ ونشر الأسبوع الحالي للجميع
         window.saveGlobalCurrentWeek = function() {
             const term = document.getElementById('adminTerm').value;
             const week = document.getElementById('adminWeek').value;
@@ -488,9 +492,13 @@
             const week = document.getElementById('selectWeek').value;
             
             const targetKey = `${term} / ${week}`.trim();
-            document.getElementById('pageTitle').textContent = `توزيع الإذاعة المدرسية - ${term} (${week})`;
+            const pageTitleEl = document.getElementById('pageTitle');
+            if(pageTitleEl) {
+                pageTitleEl.textContent = `توزيع الإذاعة المدرسية - ${term} (${week})`;
+            }
 
             const tableBody = document.querySelector('#employeeTable tbody');
+            if(!tableBody) return;
             tableBody.innerHTML = '';
 
             const filteredData = allData.filter(row => row.Week && row.Week.trim() === targetKey);
@@ -548,10 +556,10 @@
             
             if (body.classList.contains('dark-mode')) {
                 localStorage.setItem('theme', 'dark');
-                themeBtn.textContent = ' الوضع الفاتح';
+                if(themeBtn) themeBtn.textContent = ' الوضع الفاتح';
             } else {
                 localStorage.setItem('theme', 'light');
-                themeBtn.textContent = ' الوضع الداكن';
+                if(themeBtn) themeBtn.textContent = ' الوضع الداكن';
             }
         };
 
@@ -584,9 +592,14 @@
             onValue(dbRef, (snapshot) => {
                 const data = snapshot.val();
                 allData = data ? Object.values(data) : [];
+                
                 window.updateWeeksFilter();
-                window.autoSelectCurrentWeek();
-                if(document.getElementById("adminPanel").style.display === "block") {
+                
+                // تفعيل الاستماع للإعدادات المركزية لضبط الأسبوع الحالي وتحديثه تلقائياً
+                listenToGlobalSettings();
+
+                const adminPanel = document.getElementById("adminPanel");
+                if(adminPanel && adminPanel.style.display === "block") {
                     window.fillAdminTableData();
                 }
                 hideSpinner();
@@ -634,13 +647,11 @@
                 if(themeBtn) themeBtn.textContent = ' الوضع الفاتح';
             }
 
-            // تم إخراجها وتعديل مكانها لتشتغل في كل الحالات بشكل صحيح
-            listenToGlobalSettings();
-
             window.updateAdminWeeks();
             loadData();
         });
-    </script>
+</script> 
+
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎙️</text></svg>">
 </head>
 <body>
