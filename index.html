@@ -260,7 +260,7 @@
         let allData = [];
 
         const daysOfWeek = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس"];
-        const gradesList = ["أول ثانوي", "ثاني ثانوي", "ثالث ثانوي"];
+        const gradesList = ["أول ثانوي", "ثاني ثانوي", "ثالث ثانوي", "الإرشاد الطلابي"];
         const classesList = ["1", "2", "3", "4", "5", "6", "7", "8"];
 
         const hijriDays = Array.from({length: 30}, (_, i) => String(i + 1));
@@ -317,6 +317,43 @@
             };
             return map[monthName] || 0;
         }
+
+        // جلب الإعدادات العامة المعتمَدة من قاعدة البيانات للتابعين والتحكم المركزي
+        function listenToGlobalSettings() {
+            const settingsRef = ref(db, 'globalSettings');
+            onValue(settingsRef, (snapshot) => {
+                const settings = snapshot.val();
+                if (settings && settings.currentTerm && settings.currentWeek) {
+                    const termSelect = document.getElementById('selectTerm');
+                    const weekSelect = document.getElementById('selectWeek');
+                    
+                    if (termSelect && weekSelect) {
+                        termSelect.value = settings.currentTerm;
+                        window.updateWeeksFilter(); 
+                        weekSelect.value = settings.currentWeek;
+                        window.filterTable(); 
+                    }
+                }
+            });
+        }
+
+        // دالة حفظ ونشر الأسبوع الحالي للجميع (أصبحت دالة مستقلة وصحيحة 100%)
+        window.saveGlobalCurrentWeek = function() {
+            const term = document.getElementById('adminTerm').value;
+            const week = document.getElementById('adminWeek').value;
+            const msgEl = document.getElementById('message');
+
+            set(ref(db, 'globalSettings'), {
+                currentTerm: term,
+                currentWeek: week
+            }).then(() => {
+                msgEl.style.color = 'green';
+                msgEl.textContent = `تم تعيين ونشر (${term} - ${week}) كأسبوع حالي للجميع بنجاح! ✨`;
+            }).catch((error) => {
+                msgEl.style.color = 'red';
+                msgEl.textContent = 'حدث خطأ أثناء الحفظ.';
+            });
+        };
 
         window.autoSelectCurrentWeek = function() {
             const termSelect = document.getElementById('selectTerm');
@@ -597,6 +634,9 @@
                 if(themeBtn) themeBtn.textContent = ' الوضع الفاتح';
             }
 
+            // تم إخراجها وتعديل مكانها لتشتغل في كل الحالات بشكل صحيح
+            listenToGlobalSettings();
+
             window.updateAdminWeeks();
             loadData();
         });
@@ -689,7 +729,11 @@
                 <select id="adminWeek" name="Week" onchange="fillAdminTableData()">
                     </select>
             </div>
-
+<div class="global-sync-box" style="background: rgba(11, 114, 133, 0.1); border: 1px solid #0b7285; padding: 12px; border-radius: 8px; margin-bottom: 15px;">
+    <label style="color: #0b7285; margin-bottom: 8px;">التحكم المركزي (تعيين الأسبوع الحالي الذي يظهر لكل الطلاب تلقائياً):</label>
+    <p style="font-size: 13px; margin: 0 0 10px 0; color: #555;">اختر الفصل والأسبوع أدناه ثم اضغط الزر ليتم تحديث الشاشة لدى جميع الطلاب والمعلمين فوراً.</p>
+    <button type="button" onclick="saveGlobalCurrentWeek()" style="background-color: #0b7285; font-size: 14px; padding: 8px 12px; width: auto; color: white; border: none; border-radius: 8px; cursor: pointer;">📌 تعيين هذا الأسبوع كـ "الأسبوع الحالي للجميع"</button>
+</div>
             <div class="table-responsive">
                 <table id="adminTable">
                     <thead>
