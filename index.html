@@ -238,7 +238,7 @@
             100% { transform: rotate(360deg); }
         }
     </style>
-<<script type="module">
+<script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
         import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
 
@@ -449,6 +449,7 @@
                         </td>
                         <td><select id="d_${index}_grade">${gradeOptions}</select></td>
                         <td><select id="d_${index}_class">${classOptions}</select></td>
+                        <td><input type="text" id="d_${index}_teacher" placeholder="اسم المعلمة..."></td>
                         <td><input type="text" id="d_${index}_topic" placeholder="موضوع الإذاعة..."></td>
                     </tr>
                 `;
@@ -476,6 +477,7 @@
 
                 let gradeEl = document.getElementById(`d_${index}_grade`);
                 let classEl = document.getElementById(`d_${index}_class`);
+                let teacherEl = document.getElementById(`d_${index}_teacher`);
                 let topicEl = document.getElementById(`d_${index}_topic`);
 
                 if(gradeEl) gradeEl.value = rowData && rowData.Grade ? rowData.Grade.trim() : '';
@@ -483,6 +485,7 @@
                     let savedClass = rowData && rowData.Class ? rowData.Class.replace('فصل', '').trim() : '';
                     classEl.value = savedClass;
                 }
+                if(teacherEl) teacherEl.value = rowData && rowData.Teacher ? rowData.Teacher.trim() : '';
                 if(topicEl) topicEl.value = rowData && rowData.Details ? rowData.Details.trim() : '';
             });
         };
@@ -504,7 +507,7 @@
             const filteredData = allData.filter(row => row.Week && row.Week.trim() === targetKey);
 
             if (filteredData.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="5" style="color: #777;">لا توجد بيانات مسجلة لهذه الفترة حتى الآن.</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="6" style="color: #777;">لا توجد بيانات مسجلة لهذه الفترة حتى الآن.</td></tr>`;
                 return;
             }
 
@@ -525,6 +528,7 @@
                             <td>${fullDateDisplay}</td>
                             <td>${row.Grade || ''}</td>
                             <td>${displayClass}</td>
+                            <td>${row.Teacher || ''}</td>
                             <td>${row.Details || ''}</td>
                         </tr>
                     `;
@@ -595,7 +599,6 @@
                 
                 window.updateWeeksFilter();
                 
-                // تفعيل الاستماع للإعدادات المركزية لضبط الأسبوع الحالي وتحديثه تلقائياً
                 listenToGlobalSettings();
 
                 const adminPanel = document.getElementById("adminPanel");
@@ -627,6 +630,7 @@
                     Year: document.getElementById(`d_${index}_year`).value,
                     Grade: document.getElementById(`d_${index}_grade`).value,
                     Class: document.getElementById(`d_${index}_class`).value,
+                    Teacher: document.getElementById(`d_${index}_teacher`).value,
                     Details: document.getElementById(`d_${index}_topic`).value
                 };
 
@@ -650,7 +654,7 @@
             window.updateAdminWeeks();
             loadData();
         });
-</script> 
+</script>
 
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎙️</text></svg>">
 </head>
@@ -709,6 +713,7 @@
                         <th>التاريخ الهجري</th>
                         <th>الصف</th>
                         <th>الفصل</th>
+                        <th>المعلمة</th>
                         <th>موضوع الإذاعة</th>
                     </tr>
                 </thead>
@@ -753,6 +758,7 @@
                             <th>التاريخ الهجري (يوم / شهر / سنة)</th>
                             <th>الصف</th>
                             <th>الفصل</th>
+                            <th>المعلمة</th>
                             <th>موضوع الإذاعة</th>
                         </tr>
                     </thead>
